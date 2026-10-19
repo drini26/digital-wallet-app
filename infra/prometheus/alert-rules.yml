@@ -1,0 +1,45 @@
+# Prometheus alert rules, loaded by the prometheus container (see prometheus.yml; UI at http://localhost:9090/alerts).
+groups:
+  - name: wallet
+    rules:
+      - alert: LedgerFrozen
+        expr: max(wallet_system_frozen) == 1
+        labels:
+          severity: critical
+        annotations:
+          summary: "Outgoing money is frozen after a reconciliation mismatch"
+          description: "Withdrawals and sweeps are stopped. Check GET /api/v1/admin/ledger/reconciliations."
+
+      - alert: PaymentLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(wallet_payment_duration_seconds_bucket[5m])) by (le)) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "95% of payments take longer than 200 ms"
+          description: "Check database lock waits (503 LOCK_TIMEOUT answers) and database load."
+
+      - alert: ManyRejectedPayments
+        expr: increase(wallet_payment_rejected_total[10m]) > 50
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 50 payments refused in 10 minutes"
+
+      - alert: ErrorRateHigh
+        expr: >
+          sum(rate(http_server_requests_seconds_count{status=~"5.."}[3m]))
+            / sum(rate(http_server_requests_seconds_count[3m])) > 0.01
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "More than 1% of requests failed with a 5xx error over the last 3 minutes"
+
+      - alert: ServiceDown
+        expr: max by (service) (up) == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.service }} is not answering"

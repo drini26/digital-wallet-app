@@ -1,0 +1,11 @@
+# Keep the Docker build context small: sources and build files only.
+.git
+.idea
+.vscode
+**/target
+**/node_modules
+frontend/dist
+frontend/.angular
+docs
+.env
+*.iml

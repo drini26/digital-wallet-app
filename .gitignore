@@ -1,0 +1,23 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local settings (ports, secrets); .env.example is the committed template
+.env
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# Logs
+*.log
